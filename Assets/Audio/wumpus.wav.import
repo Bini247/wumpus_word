@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/wumpus.wav-9d84ba481fb3e7edcc0e4611078f90b9.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/wumpus.wav"
+dest_files=[ "res://.import/wumpus.wav-9d84ba481fb3e7edcc0e4611078f90b9.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
