@@ -61,7 +61,6 @@ died_scene = "res://Screens/DieScreen.tscn"
 position = Vector2( 32, 15.8927 )
 scale = Vector2( 0.964923, 0.976615 )
 frames = SubResource( 6 )
-frame = 2
 playing = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -111,7 +110,8 @@ volume_db = -15.0
 [node name="Light2D" type="Light2D" parent="."]
 position = Vector2( 32.0724, 31.1814 )
 texture = ExtResource( 1 )
-texture_scale = 0.29
+texture_scale = 0.35
 energy = 0.7
+
 [connection signal="area_entered" from="Area2D" to="." method="_on_Area2D_area_entered"]
 [connection signal="body_entered" from="Area2D" to="." method="_on_Area2D_body_entered"]

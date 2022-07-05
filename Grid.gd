@@ -15,9 +15,33 @@ var inputs = [
 	'ui_right'
 ]
 
+var candles_angles = {
+	'top': {
+		'x': half_tile_size.x*2,
+		'y':half_tile_size.y,
+		'angle': 0
+	},
+	'left': {
+		'x': half_tile_size.x,
+		'y':half_tile_size.y*2,
+		'angle': -90
+	},
+	'bottom': {
+		'x': half_tile_size.x*2,
+		'y':half_tile_size.y,
+		'angle': 180
+	},
+	'right': {
+		'x': half_tile_size.x,
+		'y':half_tile_size.y*2,
+		'angle': 90
+	}
+}
+
 onready var Gold = preload("res://Agents/Gold.tscn")
 onready var Wumpus = preload("res://Agents/Wumpus.tscn")
 onready var Trap = preload("res://Agents/Trap.tscn")
+onready var Candle = preload("res://Agents/Candle.tscn")
 
 var object_dictionary
 
@@ -55,22 +79,39 @@ func set_tile_positions(positions):
 		if not grid_pos in positions:
 			set_cell(n, 0, 0)
 			if n == 0: set_cell(n, 0, 2)
+			if n == ((grid_size.x / 2) -1): set_calndles_positions(grid_pos, 'top')
 			positions.append(grid_pos)
 		grid_pos = Vector2(0, n)
 		if not grid_pos in positions:
 			set_cell(0, n, 4)
+			if n == ((grid_size.x / 2) -1): set_calndles_positions(grid_pos, 'left')
 			positions.append(grid_pos)
 		grid_pos = Vector2(n, grid_size.x-1)
 		if not grid_pos in positions:
 			set_cell(n, grid_size.x-1, 6)
 			if n == 0: set_cell(n, grid_size.x-1, 7)
 			if n == grid_size.x-1: set_cell(n, grid_size.x-1, 8)
+			if n == ((grid_size.x / 2) -1): set_calndles_positions(grid_pos, 'bottom')
 			positions.append(grid_pos)
 		grid_pos = Vector2(grid_size.x-1, n)
 		if not grid_pos in positions:
 			set_cell(grid_size.x-1, n, 5)
 			if n == 0: set_cell(grid_size.x-1, 0, 3)
+			if n == ((grid_size.x / 2) -1): set_calndles_positions(grid_pos, 'right')
 			positions.append(grid_pos)
+
+func set_calndles_positions(grid_pos, map_side):
+	#if GameData.is_ia_mode: return
+	
+	var new_object = Candle.instance()
+	grid_pos = map_to_world(grid_pos)
+	
+	grid_pos.x = grid_pos.x + candles_angles[map_side].x
+	grid_pos.y = grid_pos.y + candles_angles[map_side].y
+	
+	new_object.rotation_degrees = candles_angles[map_side].angle
+	new_object.position = grid_pos
+	add_child(new_object)
 
 func set_object_position(positions, player_position, object_type):
 	var object_position = Vector2(randi() % int(grid_size.x), randi() % int(grid_size.y))

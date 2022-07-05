@@ -35,8 +35,8 @@ var trap_positions = []
 var wumpus_positions = []
 
 var type_positions = {
-	"wumpus": false,
-	"traps": false
+	"wumpus": [],
+	"traps": []
 }
 
 var is_close_to_trap = false
@@ -75,9 +75,11 @@ func is_colliding(vector_pos):
 		
 	if next_position in tried_positions: return true
 	
-	if next_position in trap_positions && type_positions.get('traps'): return true
+	print(next_position, type_positions.get('traps'))
+	print(next_position, type_positions.get('wumpus'))
+	if next_position in type_positions.get('traps'): return true
 	
-	if next_position in wumpus_positions && type_positions.get('wumpus'): return true
+	if next_position in type_positions.get('wumpus'): return true
 	
 func move(dir):
 	var vector_pos = inputs[dir] * grid_size
@@ -89,6 +91,8 @@ func move(dir):
 	$CanvasLayer/UserInterface/VBoxContainer/Steps.text = "Steps: " + str(steps)
 	
 	if coordinates == Vector2(1,6) && gold_found: 
+		wait_message = true
+		yield(get_tree().create_timer(1.0), 'timeout')
 		get_tree().change_scene(win_scene)
 		
 	return true
@@ -119,10 +123,7 @@ func choose_close_to_enemy_path(close_to_enemy):
 	inputs_array.shuffle()
 	for input in inputs_array:
 		var vector_pos = inputs[input] * grid_size
-		if !is_colliding(vector_pos):
-			position += vector_pos
-			var coordinates = grid.world_to_map(position)
-			tried_positions.append(coordinates)
+		if set_next_position(vector_pos):
 			close_to_enemy = false
 			return true
 			
@@ -150,7 +151,7 @@ func pathFind():
 func _on_Area2D_body_entered(body):
 	if !"type" in body: return
 	
-	if body.type == 'gold':
+	if body.type == 'gold' && !gold_found:
 		$MainTheme.stop()
 		$GoldTheme.play()
 		body.set_open()
@@ -199,7 +200,7 @@ func _on_Area2D_area_entered(area):
 		wait_message = false
 		$CanvasLayer/UserInterface/VBoxContainer/Situation.text = ""
 		$CanvasLayer/UserInterface/VBoxContainer/Situation.self_modulate = Color(0,0,0,1)
-		set_enemies_positions('traps', trap_positions)
+		set_enemies_positions('traps', trap_positions, area.position)
 		return 
 		
 	if area.type == 'wumpus':
@@ -213,32 +214,36 @@ func _on_Area2D_area_entered(area):
 		wait_message = false
 		$CanvasLayer/UserInterface/VBoxContainer/Situation.text = ""
 		$CanvasLayer/UserInterface/VBoxContainer/Situation.self_modulate = Color(0,0,0,1)
-		set_enemies_positions('wumpus', wumpus_positions)
+		set_enemies_positions('wumpus', wumpus_positions, area.position)
 		return
 
-func set_enemies_positions(type_name, enemy_position):
+func set_enemies_positions(type_name, enemy_position, area_position):
 	if type_positions.get(type_name): return
 	
 	var vector_pos = Vector2.UP * grid_size
-	var new_position = position + vector_pos
+	var new_position = area_position + vector_pos
 	if check_if_is_enemy_position(new_position, enemy_position, type_name): return true
 	
 	vector_pos = Vector2.RIGHT * grid_size
-	new_position = position + vector_pos
+	new_position = area_position + vector_pos
 	if check_if_is_enemy_position(new_position, enemy_position, type_name): return true
 	
 	vector_pos = Vector2.DOWN * grid_size
-	new_position = position + vector_pos
+	new_position = area_position + vector_pos
 	if check_if_is_enemy_position(new_position, enemy_position, type_name): return true
 	
 	vector_pos = Vector2.LEFT * grid_size
-	new_position = position + vector_pos
+	new_position = area_position + vector_pos
 	if check_if_is_enemy_position(new_position, enemy_position, type_name): return true
 		
 func check_if_is_enemy_position(new_position, enemy_position, type_name):
-	if !(new_position) in tried_positions: 
-		if grid.world_to_map(new_position) in enemy_position: 
-			type_positions[type_name] = true
+	print(grid.world_to_map(new_position) in tried_positions)
+	if !(grid.world_to_map(new_position) in tried_positions): 
+		if grid.world_to_map(new_position) in enemy_position && grid.world_to_map(new_position) != grid.world_to_map(position): 
+			print('oi')
+			type_positions[type_name] = [grid.world_to_map(new_position)]
 			enemy_position = grid.world_to_map(new_position)
 			return true
-		enemy_position.append(grid.world_to_map(new_position))
+		else:
+			if grid.world_to_map(new_position) != grid.world_to_map(position):
+				enemy_position.append(grid.world_to_map(new_position))
